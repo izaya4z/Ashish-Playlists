@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+    <title>YouTube Videos Hub</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 20px; }
+      .topic { margin-bottom: 30px; }
+      .video-scroller { display: flex; overflow-x: auto; gap: 15px; padding: 10px 0; }
+      .video-card { flex: 0 0 300px; border: 1px solid #ddd; border-radius: 8px; padding: 10px; }
+      iframe { width: 100%; height: 960px; border: none; }
+    </style>
+  </head>
+  <body>
+    <h1>YouTube Videos Hub</h1>
+  `;
+
+  // Group by topic
+  const topics = {};
+  data.slice(1).forEach(row => {
+    const [topic, title, url, channel, views] = row;
+    if (!topics[topic]) topics[topic] = [];
+    topics[topic].push({ title, url, channel, views });
+  });
+
+  // Generate HTML for each topic
+  for (const topic in topics) {
+    html += `<div class="topic"><h2>${topic}</h2><div class="video-scroller">`;
+    topics[topic].forEach(video => {
+      const videoId = video.url.split('v=')[1].split('&')[0];
+      html += `
+        <div class="video-card">
+          <iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>
+          <h3>${video.title}</h3>
+          <p>${video.channel} • ${video.views}</p>
+        </div>
+      `;
+    });
+    html += `</div></div>`;
+  }
+
+  html += `</body></html>`;
+  
+  // Save HTML to a file
+  const output = HtmlService.createHtmlOutput(html);
+  SpreadsheetApp.getUi().showModalDialog(output, 'Generated Website');
